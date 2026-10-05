@@ -5,7 +5,7 @@ service firebase.storage {
     function teacher() {
       return signedIn() &&
         request.auth.token.email != null &&
-        request.auth.token.email == "CHANGE_TO_TEACHER_EMAIL@example.com";
+        request.auth.token.email == "vimukthithuhina754@gmail.com";
     }
 
     match /papers/{uid}/{fileName} {
