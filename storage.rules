@@ -1,0 +1,27 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() { return request.auth != null; }
+    function teacher() {
+      return signedIn() &&
+        request.auth.token.email != null &&
+        request.auth.token.email == "CHANGE_TO_TEACHER_EMAIL@example.com";
+    }
+
+    match /papers/{uid}/{fileName} {
+      allow read: if signedIn() && (request.auth.uid == uid || teacher());
+      allow write: if signedIn() && request.auth.uid == uid
+        && request.resource.size <= 15 * 1024 * 1024
+        && request.resource.contentType in ['application/pdf','image/jpeg','image/png'];
+      allow delete: if signedIn() && (request.auth.uid == uid || teacher());
+    }
+
+    match /avatars/{uid}/{fileName} {
+      allow read: if signedIn() && (request.auth.uid == uid || teacher());
+      allow write: if signedIn() && request.auth.uid == uid
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType in ['image/jpeg','image/png'];
+      allow delete: if signedIn() && (request.auth.uid == uid || teacher());
+    }
+  }
+}

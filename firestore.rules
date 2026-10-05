@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function teacher() {
+      return signedIn() &&
+        request.auth.token.email != null &&
+        request.auth.token.email == "CHANGE_TO_TEACHER_EMAIL@example.com";
+    }
+    function own(uid) { return signedIn() && request.auth.uid == uid; }
+
+    match /users/{uid} {
+      allow read: if own(uid) || teacher();
+      allow create: if own(uid)
+        && request.resource.data.uid == uid
+        && (
+          request.resource.data.role == "student" ||
+          (teacher() && request.resource.data.role == "teacher")
+        );
+      allow update: if own(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.status == resource.data.status
+        || teacher();
+      allow delete: if teacher();
+    }
+
+    match /papers/{paperId} {
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || teacher());
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == "pending";
+      allow update: if teacher();
+      allow delete: if teacher() || (signedIn() && resource.data.uid == request.auth.uid && resource.data.status == "pending");
+    }
+
+    match /announcements/{id} {
+      allow read: if signedIn() && resource.data.published == true;
+      allow create, update, delete: if teacher();
+    }
+  }
+}
