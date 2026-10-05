@@ -20,7 +20,7 @@ const firebaseConfig = {
 
 // Change only this email to the teacher's Firebase Authentication email.
 // Students can never promote themselves to teacher through the client UI.
-export const TEACHER_EMAIL = "vimukthithuhina754@example.com";
+export const TEACHER_EMAIL = "vimukthithuhina754@gmail.com";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
